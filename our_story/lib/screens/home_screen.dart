@@ -11,49 +11,72 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final DateTime anniversaryDate = DateTime(2023, 1, 1);
+  bool _showPetals = false;
+  final bool _bothSunny = true; // 模拟两个都是晴天的状态
 
   int get daysTogether {
     final now = DateTime.now();
     return now.difference(anniversaryDate).inDays;
   }
 
+  void _onDoubleTap() {
+    if (!_showPetals) {
+      setState(() => _showPetals = true);
+    }
+  }
+
+  void _onPetalsComplete() {
+    setState(() => _showPetals = false);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: GradientBackground(
-        child: SafeArea(
-          child: SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Column(
-                children: [
-                  const SizedBox(height: 20),
-                  FadeInWidget(
-                    delay: const Duration(milliseconds: 100),
-                    child: _buildHeader(),
+      body: Stack(
+        children: [
+          GradientBackground(
+            child: SafeArea(
+              child: GestureDetector(
+                onDoubleTap: _onDoubleTap,
+                behavior: HitTestBehavior.translucent,
+                child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 20),
+                        FadeInWidget(
+                          delay: const Duration(milliseconds: 100),
+                          child: _buildHeader(),
+                        ),
+                        const SizedBox(height: 28),
+                        FadeInWidget(
+                          delay: const Duration(milliseconds: 250),
+                          child: _buildDaysCounter(),
+                        ),
+                        const SizedBox(height: 28),
+                        FadeInWidget(
+                          delay: const Duration(milliseconds: 400),
+                          child: _buildWeatherSection(),
+                        ),
+                        const SizedBox(height: 20),
+                        FadeInWidget(
+                          delay: const Duration(milliseconds: 550),
+                          child: _buildDistanceCard(),
+                        ),
+                        const SizedBox(height: 28),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 28),
-                  FadeInWidget(
-                    delay: const Duration(milliseconds: 250),
-                    child: _buildDaysCounter(),
-                  ),
-                  const SizedBox(height: 28),
-                  FadeInWidget(
-                    delay: const Duration(milliseconds: 400),
-                    child: _buildWeatherSection(),
-                  ),
-                  const SizedBox(height: 20),
-                  FadeInWidget(
-                    delay: const Duration(milliseconds: 550),
-                    child: _buildDistanceCard(),
-                  ),
-                  const SizedBox(height: 28),
-                ],
+                ),
               ),
             ),
           ),
-        ),
+          if (_bothSunny) const SunParticles(),
+          if (_showPetals)
+            Positioned.fill(child: PetalFall(onComplete: _onPetalsComplete)),
+        ],
       ),
     );
   }
@@ -98,22 +121,24 @@ class _HomeScreenState extends State<HomeScreen> {
             crossAxisAlignment: CrossAxisAlignment.baseline,
             textBaseline: TextBaseline.alphabetic,
             children: [
-              TweenAnimationBuilder<int>(
-                tween: IntTween(begin: 0, end: daysTogether),
-                duration: const Duration(milliseconds: 1200),
-                curve: Curves.easeOutCubic,
-                builder: (context, value, child) {
-                  return Text(
-                    '$value',
-                    style: TextStyle(
-                      fontSize: 68,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.deepRose,
-                      fontFamily: 'Dancing Script',
-                      height: 1,
-                    ),
-                  );
-                },
+              PulseWidget(
+                child: TweenAnimationBuilder<int>(
+                  tween: IntTween(begin: 0, end: daysTogether),
+                  duration: const Duration(milliseconds: 1200),
+                  curve: Curves.easeOutCubic,
+                  builder: (context, value, child) {
+                    return Text(
+                      '$value',
+                      style: TextStyle(
+                        fontSize: 68,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.deepRose,
+                        fontFamily: 'Dancing Script',
+                        height: 1,
+                      ),
+                    );
+                  },
+                ),
               ),
               const SizedBox(width: 8),
               Text(
@@ -203,7 +228,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildWeatherCard({required bool isMe}) {
     final weather = isMe 
         ? {'icon': '☀️', 'temp': '28°', 'city': '我的城市', 'condition': '晴'}
-        : {'icon': '⛅', 'temp': '22°', 'city': 'Ta的城市', 'condition': '阴'};
+        : {'icon': '☀️', 'temp': '26°', 'city': 'Ta的城市', 'condition': '晴'};
     
     return SoftCard(
       margin: EdgeInsets.zero,

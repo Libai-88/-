@@ -11,6 +11,7 @@ class MomentScreen extends StatefulWidget {
 
 class _MomentScreenState extends State<MomentScreen> {
   final TextEditingController _textController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
   final List<Moment> _moments = [
     Moment(
       id: '1',
@@ -40,25 +41,56 @@ class _MomentScreenState extends State<MomentScreen> {
       isMe: true,
     ),
   ];
+  String? _highlightedId;
+  String? _burstEmoji;
+  String? _burstId;
 
   void _addMoment() {
     if (_textController.text.trim().isEmpty) return;
     
     setState(() {
-      _moments.insert(
-        0,
-        Moment(
-          id: DateTime.now().millisecondsSinceEpoch.toString(),
-          content: _textController.text.trim(),
-          imageUrl: null,
-          createdAt: DateTime.now(),
-          hugs: 0,
-          headPats: 0,
-          isMe: true,
-        ),
+      final newMoment = Moment(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        content: _textController.text.trim(),
+        imageUrl: null,
+        createdAt: DateTime.now(),
+        hugs: 0,
+        headPats: 0,
+        isMe: true,
       );
+      _moments.insert(0, newMoment);
+      _highlightedId = newMoment.id;
       _textController.clear();
     });
+
+    Future.delayed(const Duration(milliseconds: 100), () {
+      _scrollController.animateTo(
+        0,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+    });
+
+    Future.delayed(const Duration(seconds: 1), () {
+      if (mounted) setState(() => _highlightedId = null);
+    });
+  }
+
+  void _triggerBurst(String emoji, String id) {
+    setState(() {
+      _burstEmoji = emoji;
+      _burstId = id;
+    });
+    Future.delayed(const Duration(milliseconds: 800), () {
+      if (mounted) setState(() => _burstEmoji = null);
+    });
+  }
+
+  @override
+  void dispose() {
+    _textController.dispose();
+    _scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -74,6 +106,7 @@ class _MomentScreenState extends State<MomentScreen> {
               ),
               Expanded(
                 child: ListView.builder(
+                  controller: _scrollController,
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   physics: const BouncingScrollPhysics(),
                   itemCount: _moments.length,
@@ -85,10 +118,31 @@ class _MomentScreenState extends State<MomentScreen> {
                       child: Column(
                         children: [
                           if (showTimeline) _buildTimeline(),
-                          _MomentCard(
-                            moment: moment,
-                            onHug: () => setState(() => moment.hugs++),
-                            onHeadPat: () => setState(() => moment.headPats++),
+                          Stack(
+                            children: [
+                              _MomentCard(
+                                moment: moment,
+                                isHighlighted: _highlightedId == moment.id,
+                                onHug: () {
+                                  setState(() => moment.hugs++);
+                                  _triggerBurst('🤗', moment.id);
+                                },
+                                onHeadPat: () {
+                                  setState(() => moment.headPats++);
+                                  _triggerBurst('🙆', moment.id);
+                                },
+                              ),
+                              if (_burstEmoji != null && _burstId == moment.id)
+                                Positioned.fill(
+                                  child: Align(
+                                    alignment: Alignment.bottomCenter,
+                                    child: EmojiBurst(
+                                      emoji: _burstEmoji!,
+                                      onComplete: () {},
+                                    ),
+                                  ),
+                                ),
+                            ],
                           ),
                         ],
                       ),
@@ -164,7 +218,7 @@ class _MomentScreenState extends State<MomentScreen> {
               BouncyTap(
                 onTap: _addMoment,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                   decoration: BoxDecoration(
                     color: AppColors.primaryPink,
                     borderRadius: BorderRadius.circular(24),
@@ -178,7 +232,6 @@ class _MomentScreenState extends State<MomentScreen> {
                         style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.w600,
-                          fontSize: 14,
                         ),
                       ),
                     ],
@@ -196,9 +249,9 @@ class _MomentScreenState extends State<MomentScreen> {
     return BouncyTap(
       onTap: () {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
             content: Text('图片上传功能开发中... 📸'),
-            duration: const Duration(seconds: 1),
+            duration: Duration(seconds: 1),
           ),
         );
       },
@@ -206,7 +259,7 @@ class _MomentScreenState extends State<MomentScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
           color: AppColors.cream,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(24),
         ),
         child: Row(
           children: [
@@ -245,12 +298,6 @@ class _MomentScreenState extends State<MomentScreen> {
       ),
     );
   }
-
-  @override
-  void dispose() {
-    _textController.dispose();
-    super.dispose();
-  }
 }
 
 class Moment {
@@ -273,70 +320,93 @@ class Moment {
   });
 }
 
-class _MomentCard extends StatelessWidget {
+class _MomentCard extends StatefulWidget {
   final Moment moment;
+  final bool isHighlighted;
   final VoidCallback onHug;
   final VoidCallback onHeadPat;
 
   const _MomentCard({
     required this.moment,
+    required this.isHighlighted,
     required this.onHug,
     required this.onHeadPat,
   });
 
   @override
+  State<_MomentCard> createState() => _MomentCardState();
+}
+
+class _MomentCardState extends State<_MomentCard> {
+  bool _isBouncing = false;
+
+  void _bounce() {
+    setState(() => _isBouncing = true);
+    Future.delayed(const Duration(milliseconds: 300), () {
+      if (mounted) setState(() => _isBouncing = false);
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return SoftCard(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+    return HighlightWidget(
+      highlight: widget.isHighlighted,
+      child: AnimatedScale(
+        scale: _isBouncing ? 1.03 : 1.0,
+        duration: const Duration(milliseconds: 300),
+        child: SoftCard(
+          margin: const EdgeInsets.only(bottom: 12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: moment.isMe ? AppColors.softPink : AppColors.softLavender,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Center(
-                  child: Text(
-                    moment.isMe ? '😊' : '🥰',
-                    style: const TextStyle(fontSize: 20),
+              Row(
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: widget.moment.isMe ? AppColors.softPink : AppColors.softLavender,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Center(
+                      child: Text(
+                        widget.moment.isMe ? '😊' : '🥰',
+                        style: const TextStyle(fontSize: 20),
+                      ),
+                    ),
                   ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      moment.isMe ? '我' : 'Ta',
-                      style: Theme.of(context).textTheme.titleSmall,
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.moment.isMe ? '我' : 'Ta',
+                          style: Theme.of(context).textTheme.titleSmall,
+                        ),
+                        Text(
+                          _formatTime(widget.moment.createdAt),
+                          style: Theme.of(context).textTheme.labelSmall,
+                        ),
+                      ],
                     ),
-                    Text(
-                      _formatTime(moment.createdAt),
-                      style: Theme.of(context).textTheme.labelSmall,
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
+              if (widget.moment.imageUrl != null) ...[
+                const SizedBox(height: 12),
+                const ImagePlaceholder(height: 140),
+              ],
+              const SizedBox(height: 12),
+              Text(
+                widget.moment.content,
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              const SizedBox(height: 14),
+              _buildReactionBar(context),
             ],
           ),
-          if (moment.imageUrl != null) ...[
-            const SizedBox(height: 12),
-            const ImagePlaceholder(height: 140),
-          ],
-          const SizedBox(height: 12),
-          Text(
-            moment.content,
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-          const SizedBox(height: 14),
-          _buildReactionBar(context),
-        ],
+        ),
       ),
     );
   }
@@ -345,20 +415,60 @@ class _MomentCard extends StatelessWidget {
     return Row(
       children: [
         Expanded(
-          child: _ReactionButton(
-            icon: '🤗',
-            label: '拥抱',
-            count: moment.hugs,
-            onTap: onHug,
+          child: BouncyTap(
+            onTap: () {
+              _bounce();
+              widget.onHug();
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                color: AppColors.cream,
+                borderRadius: BorderRadius.circular(24),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text('🤗', style: const TextStyle(fontSize: 18)),
+                  const SizedBox(width: 6),
+                  Text(
+                    '拥抱 ${widget.moment.hugs}',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: AppColors.warmBrown,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
         const SizedBox(width: 12),
         Expanded(
-          child: _ReactionButton(
-            icon: '🙆',
-            label: '摸摸头',
-            count: moment.headPats,
-            onTap: onHeadPat,
+          child: BouncyTap(
+            onTap: () {
+              _bounce();
+              widget.onHeadPat();
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                color: AppColors.cream,
+                borderRadius: BorderRadius.circular(24),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text('🙆', style: const TextStyle(fontSize: 18)),
+                  const SizedBox(width: 6),
+                  Text(
+                    '摸摸头 ${widget.moment.headPats}',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: AppColors.warmBrown,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
       ],
@@ -374,80 +484,5 @@ class _MomentCard extends StatelessWidget {
     if (diff.inHours < 24) return '${diff.inHours}小时前';
     if (diff.inDays < 7) return '${diff.inDays}天前';
     return DateFormat('MM月dd日').format(time);
-  }
-}
-
-class _ReactionButton extends StatefulWidget {
-  final String icon;
-  final String label;
-  final int count;
-  final VoidCallback onTap;
-
-  const _ReactionButton({
-    required this.icon,
-    required this.label,
-    required this.count,
-    required this.onTap,
-  });
-
-  @override
-  State<_ReactionButton> createState() => _ReactionButtonState();
-}
-
-class _ReactionButtonState extends State<_ReactionButton>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _scaleAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 200),
-      vsync: this,
-    );
-    _scaleAnimation = TweenSequence<double>([
-      TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.3), weight: 50),
-      TweenSequenceItem(tween: Tween(begin: 1.3, end: 1.0), weight: 50),
-    ]).animate(CurvedAnimation(parent: _controller, curve: Curves.elasticOut));
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        _controller.forward(from: 0);
-        widget.onTap();
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-        decoration: BoxDecoration(
-          color: AppColors.cream,
-          borderRadius: BorderRadius.circular(24),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            ScaleTransition(
-              scale: _scaleAnimation,
-              child: Text(widget.icon, style: const TextStyle(fontSize: 18)),
-            ),
-            const SizedBox(width: 6),
-            Text(
-              '${widget.label} ${widget.count}',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: AppColors.warmBrown,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 }

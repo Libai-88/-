@@ -9,8 +9,7 @@ class WishlistScreen extends StatefulWidget {
   State<WishlistScreen> createState() => _WishlistScreenState();
 }
 
-class _WishlistScreenState extends State<WishlistScreen>
-    with SingleTickerProviderStateMixin {
+class _WishlistScreenState extends State<WishlistScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   final List<Wish> _wishes = [
@@ -63,6 +62,8 @@ class _WishlistScreenState extends State<WishlistScreen>
     ),
   ];
 
+  String? _celebratingId;
+
   @override
   void initState() {
     super.initState();
@@ -95,6 +96,7 @@ class _WishlistScreenState extends State<WishlistScreen>
     setState(() {
       wish.isAchieved = true;
       wish.achievedAt = DateTime.now();
+      _celebratingId = wish.id;
     });
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -102,6 +104,9 @@ class _WishlistScreenState extends State<WishlistScreen>
         backgroundColor: AppColors.deepRose,
       ),
     );
+    Future.delayed(const Duration(milliseconds: 800), () {
+      if (mounted) setState(() => _celebratingId = null);
+    });
   }
 
   void _showAddWishDialog() {
@@ -144,18 +149,18 @@ class _WishlistScreenState extends State<WishlistScreen>
               const SizedBox(height: 16),
               TextField(
                 controller: titleController,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   hintText: '愿望标题',
-                  prefixIcon: Icon(Icons.star_rounded),
+                  prefixIcon: const Icon(Icons.star_rounded),
                 ),
               ),
               const SizedBox(height: 12),
               TextField(
                 controller: descController,
                 maxLines: 2,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   hintText: '描述一下这个愿望...',
-                  prefixIcon: Icon(Icons.edit_rounded),
+                  prefixIcon: const Icon(Icons.edit_rounded),
                 ),
               ),
               const SizedBox(height: 20),
@@ -363,12 +368,20 @@ class _WishlistScreenState extends State<WishlistScreen>
       physics: const BouncingScrollPhysics(),
       itemCount: wishes.length,
       itemBuilder: (context, index) {
+        final wish = wishes[index];
+        final isCelebrating = _celebratingId == wish.id;
         return FadeInWidget(
           delay: Duration(milliseconds: 100 + index * 80),
-          child: _WishCard(
-            wish: wishes[index],
-            onClaim: () => _claimWish(wishes[index]),
-            onAchieve: () => _markAsAchieved(wishes[index]),
+          child: Stack(
+            children: [
+              _WishCard(
+                wish: wish,
+                onClaim: () => _claimWish(wish),
+                onAchieve: () => _markAsAchieved(wish),
+              ),
+              if (isCelebrating)
+                Positioned.fill(child: GoldenCelebration(onComplete: () {})),
+            ],
           ),
         );
       },
@@ -398,7 +411,7 @@ class Wish {
   });
 }
 
-class _WishCard extends StatelessWidget {
+class _WishCard extends StatefulWidget {
   final Wish wish;
   final VoidCallback onClaim;
   final VoidCallback onAchieve;
@@ -410,121 +423,205 @@ class _WishCard extends StatelessWidget {
   });
 
   @override
+  State<_WishCard> createState() => _WishCardState();
+}
+
+class _WishCardState extends State<_WishCard> with SingleTickerProviderStateMixin {
+  late AnimationController _flipController;
+  late Animation<double> _flipAnimation;
+  bool _isFlipped = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _flipController = AnimationController(
+      duration: const Duration(milliseconds: 600),
+      vsync: this,
+    );
+    _flipAnimation = Tween<double>(begin: 0, end: 1).animate(_flipController);
+  }
+
+  @override
+  void didUpdateWidget(_WishCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.wish.claimedBy == null && widget.wish.claimedBy != null) {
+      _flip();
+    }
+  }
+
+  void _flip() {
+    setState(() => _isFlipped = true);
+    _flipController.forward();
+    Future.delayed(const Duration(milliseconds: 600), () {
+      if (mounted) setState(() => _isFlipped = false);
+    });
+  }
+
+  @override
+  void dispose() {
+    _flipController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Opacity(
-      opacity: wish.isAchieved ? 0.6 : 1.0,
+      opacity: widget.wish.isAchieved ? 0.6 : 1.0,
       child: SoftCard(
         margin: const EdgeInsets.only(bottom: 12),
         padding: EdgeInsets.zero,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: AnimatedBuilder(
+          animation: _flipAnimation,
+          builder: (context, child) {
+            final angle = _flipAnimation.value * 3.1416;
+            final isFront = angle < 3.1416 / 2;
+            return Transform(
+              transform: Matrix4.identity()
+                ..setEntry(3, 2, 0.001)
+                ..rotateY(angle),
+              alignment: Alignment.center,
+              child: isFront ? _buildFront() : _buildBack(),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFront() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Stack(
           children: [
-            Stack(
-              children: [
-                Container(
-                  height: 100,
-                  width: double.infinity,
-                  decoration: const BoxDecoration(
-                    color: AppColors.cream,
-                    borderRadius: BorderRadius.vertical(
-                      top: Radius.circular(16),
-                    ),
-                  ),
-                  child: Center(
-                    child: Text(
-                      _getWishEmoji(wish.title),
-                      style: const TextStyle(fontSize: 40),
-                    ),
-                  ),
+            Container(
+              height: 100,
+              width: double.infinity,
+              decoration: const BoxDecoration(
+                color: AppColors.cream,
+                borderRadius: BorderRadius.vertical(
+                  top: Radius.circular(16),
                 ),
-                if (wish.isAchieved)
-                  Positioned(
-                    top: 10,
-                    right: 10,
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: AppColors.deepRose,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: const Icon(
-                        Icons.check_rounded,
-                        color: Colors.white,
-                        size: 16,
-                      ),
-                    ),
-                  ),
-                Positioned(
-                  bottom: 10,
-                  left: 10,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.9),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      _formatDate(wish.isAchieved ? wish.achievedAt! : wish.createdAt),
-                      style: Theme.of(context).textTheme.labelSmall,
-                    ),
-                  ),
+              ),
+              child: Center(
+                child: Text(
+                  _getWishEmoji(widget.wish.title),
+                  style: const TextStyle(fontSize: 40),
                 ),
-              ],
+              ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(14),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+            if (widget.wish.isAchieved)
+              Positioned(
+                top: 10,
+                right: 10,
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppColors.deepRose,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: const Icon(
+                    Icons.check_rounded,
+                    color: Colors.white,
+                    size: 16,
+                  ),
+                ),
+              ),
+            Positioned(
+              bottom: 10,
+              left: 10,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.9),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  _formatDate(widget.wish.isAchieved ? widget.wish.achievedAt! : widget.wish.createdAt),
+                  style: Theme.of(context).textTheme.labelSmall,
+                ),
+              ),
+            ),
+          ],
+        ),
+        Padding(
+          padding: const EdgeInsets.all(14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
                 children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          wish.title,
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            decoration: wish.isAchieved
-                                ? TextDecoration.lineThrough
-                                : null,
-                          ),
+                  Expanded(
+                    child: Text(
+                      widget.wish.title,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        decoration: widget.wish.isAchieved
+                            ? TextDecoration.lineThrough
+                            : null,
+                      ),
+                    ),
+                  ),
+                  if (widget.wish.isAchieved)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.softLavender,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        '已实现',
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: AppColors.deepRose,
                         ),
                       ),
-                      if (wish.isAchieved)
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppColors.softLavender,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            '已实现',
-                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              color: AppColors.deepRose,
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    wish.description,
-                    style: Theme.of(context).textTheme.bodySmall,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 12),
-                  if (wish.claimedBy != null && wish.claimedBy != 'none')
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: _buildClaimBadge(context),
                     ),
-                  if (!wish.isAchieved) _buildActionButtons(context),
                 ],
+              ),
+              const SizedBox(height: 6),
+              Text(
+                widget.wish.description,
+                style: Theme.of(context).textTheme.bodySmall,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 12),
+              if (widget.wish.claimedBy != null && widget.wish.claimedBy != 'none' && !widget.wish.isAchieved)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: _buildClaimBadge(context),
+                ),
+              if (!widget.wish.isAchieved) _buildActionButtons(context),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBack() {
+    return Container(
+      height: 260,
+      width: double.infinity,
+      decoration: const BoxDecoration(
+        color: AppColors.softPink,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text('💝', style: TextStyle(fontSize: 48)),
+            const SizedBox(height: 12),
+            Text(
+              _getClaimText(),
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                color: AppColors.warmBrown,
               ),
             ),
           ],
@@ -534,28 +631,11 @@ class _WishCard extends StatelessWidget {
   }
 
   Widget _buildClaimBadge(BuildContext context) {
-    String text;
-    Color color;
-    switch (wish.claimedBy) {
-      case 'me':
-        text = '🙋 我要带Ta去';
-        color = AppColors.primaryPink;
-        break;
-      case 'ta':
-        text = '🥰 Ta要带我去';
-        color = AppColors.softLavender;
-        break;
-      case 'both':
-        text = '💕 我们一起去';
-        color = AppColors.deepRose;
-        break;
-      default:
-        text = '';
-        color = Colors.transparent;
-    }
-
+    String text = _getClaimText();
+    Color color = AppColors.primaryPink;
+    
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
         color: color.withOpacity(0.15),
         borderRadius: BorderRadius.circular(12),
@@ -569,12 +649,25 @@ class _WishCard extends StatelessWidget {
     );
   }
 
+  String _getClaimText() {
+    switch (widget.wish.claimedBy) {
+      case 'me':
+        return '🙋 我要带Ta去';
+      case 'ta':
+        return '🥰 Ta要带我去';
+      case 'both':
+        return '💝 我们一起去';
+      default:
+        return '';
+    }
+  }
+
   Widget _buildActionButtons(BuildContext context) {
     return Row(
       children: [
         Expanded(
           child: BouncyTap(
-            onTap: onClaim,
+            onTap: widget.onClaim,
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 12),
               decoration: BoxDecoration(
@@ -588,7 +681,7 @@ class _WishCard extends StatelessWidget {
                     Icon(Icons.volunteer_activism_rounded, size: 16, color: AppColors.deepRose),
                     const SizedBox(width: 6),
                     Text(
-                      wish.claimedBy == null ? '我要认领' : '已认领',
+                      widget.wish.claimedBy == null ? '我要认领' : '已认领',
                       style: TextStyle(color: AppColors.deepRose, fontWeight: FontWeight.w600, fontSize: 13),
                     ),
                   ],
@@ -600,7 +693,7 @@ class _WishCard extends StatelessWidget {
         const SizedBox(width: 10),
         Expanded(
           child: BouncyTap(
-            onTap: onAchieve,
+            onTap: widget.onAchieve,
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 12),
               decoration: BoxDecoration(
@@ -645,7 +738,7 @@ class _WishCard extends StatelessWidget {
   }
 
   String _formatDate(DateTime date) {
-    if (wish.isAchieved) {
+    if (widget.wish.isAchieved) {
       return '实现于 ${DateFormat('yyyy.MM.dd').format(date)}';
     }
     return DateFormat('yyyy.MM.dd').format(date);

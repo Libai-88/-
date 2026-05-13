@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../config/app_theme.dart';
@@ -503,7 +504,7 @@ class Whisper {
   });
 }
 
-class _WhisperCard extends StatelessWidget {
+class _WhisperCard extends StatefulWidget {
   final Whisper whisper;
   final bool isSent;
 
@@ -513,9 +514,49 @@ class _WhisperCard extends StatelessWidget {
   });
 
   @override
+  State<_WhisperCard> createState() => _WhisperCardState();
+}
+
+class _WhisperCardState extends State<_WhisperCard>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+  bool _isRevealed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 600),
+      vsync: this,
+    );
+    _animation = CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
+    _isRevealed = widget.whisper.status == WhisperStatus.delivered;
+    if (_isRevealed) {
+      _controller.value = 1.0;
+    }
+  }
+
+  @override
+  void didUpdateWidget(_WhisperCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.whisper.status == WhisperStatus.delivered &&
+        oldWidget.whisper.status == WhisperStatus.delivering) {
+      _isRevealed = true;
+      _controller.forward();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final isDelivering = whisper.status == WhisperStatus.delivering;
-    final isDelivered = whisper.status == WhisperStatus.delivered;
+    final isDelivering = widget.whisper.status == WhisperStatus.delivering;
+    final isDelivered = widget.whisper.status == WhisperStatus.delivered;
 
     return SoftCard(
       margin: const EdgeInsets.only(bottom: 12),
@@ -535,11 +576,13 @@ class _WhisperCard extends StatelessWidget {
                 child: Center(
                   child: isDelivered
                       ? Icon(
-                          Icons.mail_rounded,
+                          Icons.markunread_mailbox_rounded,
                           color: AppColors.deepRose,
                           size: 22,
                         )
-                      : const Text('✉️', style: TextStyle(fontSize: 22)),
+                      : ShakeWidget(
+                          child: const Text('✉️', style: TextStyle(fontSize: 22)),
+                        ),
                 ),
               ),
               const SizedBox(width: 12),
@@ -548,27 +591,31 @@ class _WhisperCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      isDelivered ? (isSent ? '已送达' : '来自Ta') : '投递中...',
+                      isDelivered ? (widget.isSent ? '已送达' : '来自Ta') : '投递中...',
                       style: Theme.of(context).textTheme.titleSmall,
                     ),
                     const SizedBox(height: 2),
                     Row(
                       children: [
                         Icon(
-                          isDelivered ? Icons.check_circle_rounded : Icons.schedule_rounded,
+                          isDelivered
+                              ? Icons.check_circle_rounded
+                              : Icons.schedule_rounded,
                           size: 12,
-                          color: isDelivered ? AppColors.deepRose : AppColors.warmBrown.withOpacity(0.5),
+                          color: isDelivered
+                              ? AppColors.deepRose
+                              : AppColors.warmBrown.withOpacity(0.5),
                         ),
                         const SizedBox(width: 4),
                         Text(
                           isDelivered
-                              ? '送达于 ${_formatTime(whisper.scheduledTime)}'
-                              : '预计 ${_formatTime(whisper.scheduledTime)}',
+                              ? '送达于 ${_formatTime(widget.whisper.scheduledTime)}'
+                              : '预计 ${_formatTime(widget.whisper.scheduledTime)}',
                           style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            color: isDelivered
-                                ? AppColors.deepRose
-                                : AppColors.warmBrown.withOpacity(0.5),
-                          ),
+                                color: isDelivered
+                                    ? AppColors.deepRose
+                                    : AppColors.warmBrown.withOpacity(0.5),
+                              ),
                         ),
                       ],
                     ),
@@ -588,53 +635,53 @@ class _WhisperCard extends StatelessWidget {
                 ),
             ],
           ),
-          if (isDelivered) ...[
-            const SizedBox(height: 12),
-            Container(
+          const SizedBox(height: 12),
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 600),
+            decoration: BoxDecoration(
+              color: AppColors.cream,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Padding(
               padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: AppColors.cream,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Text(
-                whisper.content,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontStyle: FontStyle.italic,
-                ),
+              child: AnimatedBuilder(
+                animation: _animation,
+                builder: (context, child) {
+                  return isDelivered
+                      ? Text(
+                          widget.whisper.content,
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                fontStyle: FontStyle.italic,
+                              ),
+                        )
+                      : Row(
+                          children: [
+                            Icon(
+                              Icons.lock_rounded,
+                              size: 14,
+                              color: AppColors.warmBrown.withOpacity(0.5),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              '内容将在送达后显示',
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: AppColors.warmBrown.withOpacity(0.5),
+                                  ),
+                            ),
+                          ],
+                        );
+                },
               ),
             ),
-          ] else ...[
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: AppColors.cream,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.lock_rounded,
-                    size: 14,
-                    color: AppColors.warmBrown.withOpacity(0.5),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    '内容将在送达后显示',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppColors.warmBrown.withOpacity(0.5),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
+          ),
         ],
       ),
     );
   }
 
-  String _formatTime(DateTime time) {
-    return DateFormat('MM/dd HH:mm').format(time);
+  String _formatTime(DateTime date) {
+    return DateFormat('MM/dd HH:mm').format(date);
   }
 }
+
+
