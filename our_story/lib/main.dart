@@ -3,6 +3,7 @@ import 'config/app_theme.dart';
 import 'screens/home_screen.dart';
 import 'screens/moment_screen.dart';
 import 'screens/wishlist_screen.dart';
+import 'screens/whisper_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -37,6 +38,7 @@ class _MainNavigationState extends State<MainNavigation> {
     HomeScreen(),
     MomentScreen(),
     WishlistScreen(),
+    WhisperScreen(),
   ];
 
   @override
@@ -81,6 +83,12 @@ class _MainNavigationState extends State<MainNavigation> {
                   isSelected: _currentIndex == 2,
                   onTap: () => setState(() => _currentIndex = 2),
                 ),
+                _NavItem(
+                  icon: Icons.mail_rounded,
+                  label: '悄悄话',
+                  isSelected: _currentIndex == 3,
+                  onTap: () => setState(() => _currentIndex = 3),
+                ),
               ],
             ),
           ),
@@ -110,7 +118,7 @@ class _NavItem extends StatelessWidget {
       behavior: HitTestBehavior.opaque,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         decoration: BoxDecoration(
           color: isSelected ? AppColors.softPink : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
@@ -123,7 +131,7 @@ class _NavItem extends StatelessWidget {
               size: 24,
             ),
             if (isSelected) ...[
-              const SizedBox(width: 8),
+              const SizedBox(width: 6),
               Text(
                 label,
                 style: Theme.of(context).textTheme.labelLarge?.copyWith(
