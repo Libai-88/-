@@ -12,13 +12,12 @@ class WishlistScreen extends StatefulWidget {
 class _WishlistScreenState extends State<WishlistScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  int _selectedIndex = 0;
 
   final List<Wish> _wishes = [
     Wish(
       id: '1',
       title: '一起去看极光',
-      description: '在冰岛的夜空下，感受大自然的奇幻',
+      description: '在冰岛的夜空下，感受大自然的奇幻时刻',
       imageUrl: null,
       createdAt: DateTime.now().subtract(const Duration(days: 30)),
       claimedBy: null,
@@ -27,7 +26,7 @@ class _WishlistScreenState extends State<WishlistScreen>
     Wish(
       id: '2',
       title: '学做对方爱吃的菜',
-      description: '为Ta准备一顿爱心晚餐',
+      description: '为Ta准备一顿用心的爱心晚餐',
       imageUrl: null,
       createdAt: DateTime.now().subtract(const Duration(days: 15)),
       claimedBy: 'me',
@@ -36,7 +35,7 @@ class _WishlistScreenState extends State<WishlistScreen>
     Wish(
       id: '3',
       title: '一起养一只小猫咪',
-      description: '给它取一个有意义的名字',
+      description: '给它取一个有意义的名字，一起照顾它',
       imageUrl: null,
       createdAt: DateTime.now().subtract(const Duration(days: 7)),
       claimedBy: 'ta',
@@ -45,18 +44,17 @@ class _WishlistScreenState extends State<WishlistScreen>
     Wish(
       id: '4',
       title: '在海边看日出',
-      description: '凌晨5点，牵着手等待第一缕阳光',
+      description: '凌晨时分，牵着手等待第一缕阳光',
       imageUrl: null,
       createdAt: DateTime.now().subtract(const Duration(days: 100)),
       claimedBy: 'me',
-      createdAt: DateTime.now().subtract(const Duration(days: 100)),
       achievedAt: DateTime.now().subtract(const Duration(days: 50)),
       isAchieved: true,
     ),
     Wish(
       id: '5',
       title: '一起看演唱会',
-      description: '去听最爱的歌手的现场演出',
+      description: '去听最爱的歌手的现场，和Ta一起尖叫',
       imageUrl: null,
       createdAt: DateTime.now().subtract(const Duration(days: 200)),
       claimedBy: 'both',
@@ -151,7 +149,7 @@ class _WishlistScreenState extends State<WishlistScreen>
                   prefixIcon: const Icon(Icons.star_rounded),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 14),
               TextField(
                 controller: descController,
                 maxLines: 2,
@@ -160,30 +158,44 @@ class _WishlistScreenState extends State<WishlistScreen>
                   prefixIcon: const Icon(Icons.edit_rounded),
                 ),
               ),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    if (titleController.text.trim().isNotEmpty) {
-                      setState(() {
-                        _wishes.insert(
-                          0,
-                          Wish(
-                            id: DateTime.now().millisecondsSinceEpoch.toString(),
-                            title: titleController.text.trim(),
-                            description: descController.text.trim(),
-                            imageUrl: null,
-                            createdAt: DateTime.now(),
-                            claimedBy: null,
-                            isAchieved: false,
-                          ),
-                        );
-                      });
-                      Navigator.pop(context);
-                    }
-                  },
-                  child: const Text('许下愿望 🌟'),
+              const SizedBox(height: 22),
+              BouncyTap(
+                onTap: () {
+                  if (titleController.text.trim().isNotEmpty) {
+                    setState(() {
+                      _wishes.insert(
+                        0,
+                        Wish(
+                          id: DateTime.now().millisecondsSinceEpoch.toString(),
+                          title: titleController.text.trim(),
+                          description: descController.text.trim(),
+                          imageUrl: null,
+                          createdAt: DateTime.now(),
+                          claimedBy: null,
+                          isAchieved: false,
+                        ),
+                      );
+                    });
+                    Navigator.pop(context);
+                  }
+                },
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryPink,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Center(
+                    child: Text(
+                      '许下愿望 🌟',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(height: 8),
@@ -201,8 +213,14 @@ class _WishlistScreenState extends State<WishlistScreen>
         child: SafeArea(
           child: Column(
             children: [
-              _buildHeader(),
-              _buildTabBar(),
+              FadeInWidget(
+                delay: const Duration(milliseconds: 100),
+                child: _buildHeader(),
+              ),
+              FadeInWidget(
+                delay: const Duration(milliseconds: 200),
+                child: _buildTabBar(),
+              ),
               Expanded(
                 child: TabBarView(
                   controller: _tabController,
@@ -240,13 +258,11 @@ class _WishlistScreenState extends State<WishlistScreen>
               ],
             ),
           ),
-          SoftCard(
-            margin: EdgeInsets.zero,
-            padding: const EdgeInsets.all(12),
+          BouncyTap(
             onTap: _showAddWishDialog,
             child: Container(
-              width: 48,
-              height: 48,
+              width: 46,
+              height: 46,
               decoration: BoxDecoration(
                 color: AppColors.primaryPink,
                 borderRadius: BorderRadius.circular(14),
@@ -254,7 +270,7 @@ class _WishlistScreenState extends State<WishlistScreen>
               child: const Icon(
                 Icons.add_rounded,
                 color: Colors.white,
-                size: 28,
+                size: 26,
               ),
             ),
           ),
@@ -325,14 +341,14 @@ class _WishlistScreenState extends State<WishlistScreen>
           children: [
             Text(
               _tabController.index == 0 ? '🌟' : '🎉',
-              style: const TextStyle(fontSize: 64),
+              style: const TextStyle(fontSize: 60),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 14),
             Text(
               _tabController.index == 0 ? '还没有愿望' : '还没有实现的愿望',
               style: Theme.of(context).textTheme.titleMedium,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 6),
             Text(
               _tabController.index == 0 ? '去许下第一个愿望吧~' : '完成愿望后来这里打卡吧',
               style: Theme.of(context).textTheme.bodySmall,
@@ -347,10 +363,13 @@ class _WishlistScreenState extends State<WishlistScreen>
       physics: const BouncingScrollPhysics(),
       itemCount: wishes.length,
       itemBuilder: (context, index) {
-        return _WishCard(
-          wish: wishes[index],
-          onClaim: () => _claimWish(wishes[index]),
-          onAchieve: () => _markAsAchieved(wishes[index]),
+        return FadeInWidget(
+          delay: Duration(milliseconds: 100 + index * 80),
+          child: _WishCard(
+            wish: wishes[index],
+            onClaim: () => _claimWish(wishes[index]),
+            onAchieve: () => _markAsAchieved(wishes[index]),
+          ),
         );
       },
     );
@@ -395,7 +414,7 @@ class _WishCard extends StatelessWidget {
     return Opacity(
       opacity: wish.isAchieved ? 0.6 : 1.0,
       child: SoftCard(
-        margin: const EdgeInsets.only(bottom: 16),
+        margin: const EdgeInsets.only(bottom: 14),
         padding: EdgeInsets.zero,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -403,7 +422,7 @@ class _WishCard extends StatelessWidget {
             Stack(
               children: [
                 Container(
-                  height: 120,
+                  height: 110,
                   width: double.infinity,
                   decoration: BoxDecoration(
                     color: AppColors.cream,
@@ -414,14 +433,14 @@ class _WishCard extends StatelessWidget {
                   child: Center(
                     child: Text(
                       _getWishEmoji(wish.title),
-                      style: const TextStyle(fontSize: 48),
+                      style: const TextStyle(fontSize: 44),
                     ),
                   ),
                 ),
                 if (wish.isAchieved)
                   Positioned(
-                    top: 12,
-                    right: 12,
+                    top: 10,
+                    right: 10,
                     child: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
@@ -431,13 +450,13 @@ class _WishCard extends StatelessWidget {
                       child: const Icon(
                         Icons.check_rounded,
                         color: Colors.white,
-                        size: 20,
+                        size: 18,
                       ),
                     ),
                   ),
                 Positioned(
-                  bottom: 12,
-                  left: 12,
+                  bottom: 10,
+                  left: 10,
                   child: Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 10,
@@ -456,7 +475,7 @@ class _WishCard extends StatelessWidget {
               ],
             ),
             Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(14),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -498,10 +517,10 @@ class _WishCard extends StatelessWidget {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 10),
                   if (wish.claimedBy != null && wish.claimedBy != 'none')
                     Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
+                      padding: const EdgeInsets.only(bottom: 10),
                       child: _buildClaimBadge(context),
                     ),
                   if (!wish.isAchieved) _buildActionButtons(context),
@@ -554,36 +573,53 @@ class _WishCard extends StatelessWidget {
     return Row(
       children: [
         Expanded(
-          child: OutlinedButton(
-            onPressed: onClaim,
-            style: OutlinedButton.styleFrom(
+          child: BouncyTap(
+            onTap: onClaim,
+            child: Container(
               padding: const EdgeInsets.symmetric(vertical: 12),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.volunteer_activism_rounded, size: 18),
-                const SizedBox(width: 6),
-                Text(wish.claimedBy == null ? '我要认领' : '已认领'),
-              ],
+              decoration: BoxDecoration(
+                border: Border.all(color: AppColors.primaryPink, width: 1.5),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Center(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.volunteer_activism_rounded, size: 18, color: AppColors.deepRose),
+                    const SizedBox(width: 6),
+                    Text(
+                      wish.claimedBy == null ? '我要认领' : '已认领',
+                      style: TextStyle(color: AppColors.deepRose, fontWeight: FontWeight.w600),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: 10),
         Expanded(
-          child: ElevatedButton(
-            onPressed: onAchieve,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.deepRose,
+          child: BouncyTap(
+            onTap: onAchieve,
+            child: Container(
               padding: const EdgeInsets.symmetric(vertical: 12),
-            ),
-            child: const Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.celebration_rounded, size: 18),
-                SizedBox(width: 6),
-                Text('实现啦!'),
-              ],
+              decoration: BoxDecoration(
+                color: AppColors.deepRose,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Center(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.celebration_rounded, size: 18, color: Colors.white),
+                    const SizedBox(width: 6),
+                    Text(
+                      '实现啦!',
+                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
         ),

@@ -10,7 +10,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  // 纪念日 - 请修改为你们的纪念日
   final DateTime anniversaryDate = DateTime(2023, 1, 1);
 
   int get daysTogether {
@@ -29,15 +28,27 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Column(
                 children: [
-                  const SizedBox(height: 24),
-                  _buildHeader(),
-                  const SizedBox(height: 32),
-                  _buildDaysCounter(),
-                  const SizedBox(height: 32),
-                  _buildWeatherSection(),
-                  const SizedBox(height: 24),
-                  _buildDistanceCard(),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 20),
+                  FadeInWidget(
+                    delay: const Duration(milliseconds: 100),
+                    child: _buildHeader(),
+                  ),
+                  const SizedBox(height: 28),
+                  FadeInWidget(
+                    delay: const Duration(milliseconds: 250),
+                    child: _buildDaysCounter(),
+                  ),
+                  const SizedBox(height: 28),
+                  FadeInWidget(
+                    delay: const Duration(milliseconds: 400),
+                    child: _buildWeatherSection(),
+                  ),
+                  const SizedBox(height: 20),
+                  FadeInWidget(
+                    delay: const Duration(milliseconds: 550),
+                    child: _buildDistanceCard(),
+                  ),
+                  const SizedBox(height: 28),
                 ],
               ),
             ),
@@ -50,16 +61,18 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildHeader() {
     return Column(
       children: [
-        Text(
-          '🏠',
-          style: TextStyle(fontSize: 48),
+        PulseWidget(
+          child: Text(
+            '🏠',
+            style: TextStyle(fontSize: 52),
+          ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 10),
         Text(
           '我们的关系小屋',
           style: Theme.of(context).textTheme.headlineMedium,
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 6),
         Text(
           DateFormat('yyyy年MM月dd日 EEEE', 'zh_CN').format(DateTime.now()),
           style: Theme.of(context).textTheme.bodySmall,
@@ -79,21 +92,28 @@ class _HomeScreenState extends State<HomeScreen> {
               color: AppColors.warmBrown.withOpacity(0.7),
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.baseline,
             textBaseline: TextBaseline.alphabetic,
             children: [
-              Text(
-                '$daysTogether',
-                style: TextStyle(
-                  fontSize: 72,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.deepRose,
-                  fontFamily: 'Dancing Script',
-                  height: 1,
-                ),
+              TweenAnimationBuilder<int>(
+                tween: IntTween(begin: 0, end: daysTogether),
+                duration: const Duration(milliseconds: 1200),
+                curve: Curves.easeOutCubic,
+                builder: (context, value, child) {
+                  return Text(
+                    '$value',
+                    style: TextStyle(
+                      fontSize: 68,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.deepRose,
+                      fontFamily: 'Dancing Script',
+                      height: 1,
+                    ),
+                  );
+                },
               ),
               const SizedBox(width: 8),
               Text(
@@ -172,7 +192,7 @@ class _HomeScreenState extends State<HomeScreen> {
         Row(
           children: [
             Expanded(child: _buildWeatherCard(isMe: true)),
-            const SizedBox(width: 16),
+            const SizedBox(width: 14),
             Expanded(child: _buildWeatherCard(isMe: false)),
           ],
         ),
@@ -182,19 +202,19 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildWeatherCard({required bool isMe}) {
     final weather = isMe 
-        ? {'icon': '☀️', 'temp': '28°C', 'city': '我的城市', 'condition': '晴'}
-        : {'icon': '⛅', 'temp': '22°C', 'city': 'Ta的城市', 'condition': '阴'};
+        ? {'icon': '☀️', 'temp': '28°', 'city': '我的城市', 'condition': '晴'}
+        : {'icon': '⛅', 'temp': '22°', 'city': 'Ta的城市', 'condition': '阴'};
     
     return SoftCard(
       margin: EdgeInsets.zero,
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(18),
       child: Column(
         children: [
           Text(
             weather['icon']!,
-            style: TextStyle(fontSize: 40),
+            style: TextStyle(fontSize: 42),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
           Text(
             weather['condition']!,
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
@@ -224,8 +244,8 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Row(
         children: [
           Container(
-            width: 60,
-            height: 60,
+            width: 56,
+            height: 56,
             decoration: BoxDecoration(
               color: AppColors.softPink,
               borderRadius: BorderRadius.circular(16),
@@ -233,10 +253,11 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Icon(
               Icons.distance_rounded,
               color: AppColors.deepRose,
-              size: 32,
+              size: 30,
             ),
           ),
-          const SizedBox(width: 20),
+          const SizedBox(height: 20),
+          const SizedBox(width: 18),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -269,7 +290,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           Icon(
-            Icons.heart_broken_rounded,
+            Icons.favorite_rounded,
             color: AppColors.primaryPink.withOpacity(0.5),
             size: 28,
           ),

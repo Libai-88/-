@@ -16,21 +16,21 @@ class _WhisperScreenState extends State<WhisperScreen>
   final List<Whisper> _sentWhispers = [
     Whisper(
       id: '1',
-      content: '今天看到一朵云，形状好像你的笑脸',
+      content: '今天看到一朵云，形状好像你的笑脸 ☁️',
       scheduledTime: DateTime.now().add(const Duration(hours: 2)),
       status: WhisperStatus.delivering,
       isMe: true,
     ),
     Whisper(
       id: '2',
-      content: '其实...我一直想告诉你一个秘密',
+      content: '其实...我一直想告诉你一个秘密 💕',
       scheduledTime: DateTime.now().add(const Duration(days: 1)),
       status: WhisperStatus.delivering,
       isMe: true,
     ),
     Whisper(
       id: '3',
-      content: '谢谢你一直陪在我身边',
+      content: '谢谢你一直陪在我身边，遇见你真好',
       scheduledTime: DateTime.now().subtract(const Duration(days: 2)),
       status: WhisperStatus.delivered,
       isMe: true,
@@ -40,14 +40,14 @@ class _WhisperScreenState extends State<WhisperScreen>
   final List<Whisper> _receivedWhispers = [
     Whisper(
       id: '4',
-      content: '昨晚梦见我们一起去了海边，醒来发现枕头湿了',
+      content: '昨晚梦见我们一起去了海边，醒来发现枕头湿了 🌊',
       scheduledTime: DateTime.now().subtract(const Duration(days: 1)),
       status: WhisperStatus.delivered,
       isMe: false,
     ),
     Whisper(
       id: '5',
-      content: '今天是我们在一起的第100天，我想对你说...',
+      content: '今天是我们在一起的第100天，想对你说... 💌',
       scheduledTime: DateTime.now().subtract(const Duration(days: 3)),
       status: WhisperStatus.delivered,
       isMe: false,
@@ -102,15 +102,15 @@ class _WhisperScreenState extends State<WhisperScreen>
                 const SizedBox(height: 20),
                 Row(
                   children: [
-                    const Text('✉️', style: TextStyle(fontSize: 28)),
-                    const SizedBox(width: 12),
+                    const Text('✉️', style: TextStyle(fontSize: 26)),
+                    const SizedBox(width: 10),
                     Text(
                       '写一封悄悄话',
                       style: Theme.of(context).textTheme.headlineSmall,
                     ),
                   ],
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 18),
                 Container(
                   decoration: BoxDecoration(
                     color: AppColors.cream,
@@ -118,23 +118,23 @@ class _WhisperScreenState extends State<WhisperScreen>
                   ),
                   child: TextField(
                     controller: contentController,
-                    maxLines: 5,
+                    maxLines: 4,
                     decoration: InputDecoration(
                       hintText: '写下你想对Ta说的话...',
                       border: InputBorder.none,
-                      contentPadding: const EdgeInsets.all(20),
+                      contentPadding: const EdgeInsets.all(18),
                       hintStyle: TextStyle(
                         color: AppColors.warmBrown.withOpacity(0.5),
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 18),
                 Text(
                   '选择送达时间',
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 10),
                 Wrap(
                   spacing: 8,
                   runSpacing: 8,
@@ -181,34 +181,48 @@ class _WhisperScreenState extends State<WhisperScreen>
                     ),
                   ],
                 ),
-                const SizedBox(height: 24),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      if (contentController.text.trim().isNotEmpty) {
-                        setState(() {
-                          _sentWhispers.insert(
-                            0,
-                            Whisper(
-                              id: DateTime.now().millisecondsSinceEpoch.toString(),
-                              content: contentController.text.trim(),
-                              scheduledTime: selectedTime,
-                              status: WhisperStatus.delivering,
-                              isMe: true,
-                            ),
-                          );
-                        });
-                        Navigator.pop(context);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('💌 悄悄话已投递，将在 ${_formatTime(selectedTime)} 送达'),
-                            backgroundColor: AppColors.deepRose,
+                const SizedBox(height: 22),
+                BouncyTap(
+                  onTap: () {
+                    if (contentController.text.trim().isNotEmpty) {
+                      setState(() {
+                        _sentWhispers.insert(
+                          0,
+                          Whisper(
+                            id: DateTime.now().millisecondsSinceEpoch.toString(),
+                            content: contentController.text.trim(),
+                            scheduledTime: selectedTime,
+                            status: WhisperStatus.delivering,
+                            isMe: true,
                           ),
                         );
-                      }
-                    },
-                    child: const Text('投递悄悄话 💌'),
+                      });
+                      Navigator.pop(context);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('💌 悄悄话已投递，将在 ${_formatTime(selectedTime)} 送达'),
+                          backgroundColor: AppColors.deepRose,
+                        ),
+                      );
+                    }
+                  },
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryPink,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Center(
+                      child: Text(
+                        '投递悄悄话 💌',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -230,13 +244,21 @@ class _WhisperScreenState extends State<WhisperScreen>
         selectedTime.day == time.day &&
         selectedTime.month == time.month;
 
-    return ChoiceChip(
-      label: Text(label),
-      selected: isSelected,
-      onSelected: (_) => onSelect(time),
-      selectedColor: AppColors.primaryPink,
-      labelStyle: TextStyle(
-        color: isSelected ? Colors.white : AppColors.warmBrown,
+    return BouncyTap(
+      onTap: () => onSelect(time),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.primaryPink : AppColors.cream,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isSelected ? Colors.white : AppColors.warmBrown,
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+          ),
+        ),
       ),
     );
   }
@@ -248,8 +270,14 @@ class _WhisperScreenState extends State<WhisperScreen>
         child: SafeArea(
           child: Column(
             children: [
-              _buildHeader(),
-              _buildTabBar(),
+              FadeInWidget(
+                delay: const Duration(milliseconds: 100),
+                child: _buildHeader(),
+              ),
+              FadeInWidget(
+                delay: const Duration(milliseconds: 200),
+                child: _buildTabBar(),
+              ),
               Expanded(
                 child: TabBarView(
                   controller: _tabController,
@@ -290,13 +318,11 @@ class _WhisperScreenState extends State<WhisperScreen>
                   ],
                 ),
               ),
-              SoftCard(
-                margin: EdgeInsets.zero,
-                padding: const EdgeInsets.all(12),
+              BouncyTap(
                 onTap: _showWriteWhisperDialog,
                 child: Container(
-                  width: 48,
-                  height: 48,
+                  width: 46,
+                  height: 46,
                   decoration: BoxDecoration(
                     color: AppColors.primaryPink,
                     borderRadius: BorderRadius.circular(14),
@@ -310,24 +336,25 @@ class _WhisperScreenState extends State<WhisperScreen>
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
           SoftCard(
             margin: EdgeInsets.zero,
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(14),
+            onTap: _showWriteWhisperDialog,
             child: Row(
               children: [
                 Container(
-                  width: 44,
-                  height: 44,
+                  width: 42,
+                  height: 42,
                   decoration: BoxDecoration(
                     color: AppColors.softPink,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Center(
-                    child: Text('✉️', style: TextStyle(fontSize: 24)),
+                    child: Text('✉️', style: TextStyle(fontSize: 22)),
                   ),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: 14),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -419,14 +446,14 @@ class _WhisperScreenState extends State<WhisperScreen>
           children: [
             Text(
               isSent ? '✉️' : '📭',
-              style: const TextStyle(fontSize: 64),
+              style: const TextStyle(fontSize: 60),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 14),
             Text(
               isSent ? '还没有发送悄悄话' : '还没有收到悄悄话',
               style: Theme.of(context).textTheme.titleMedium,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 6),
             Text(
               isSent ? '去给Ta写一封吧~' : '耐心等待，惊喜即将到来',
               style: Theme.of(context).textTheme.bodySmall,
@@ -441,9 +468,12 @@ class _WhisperScreenState extends State<WhisperScreen>
       physics: const BouncingScrollPhysics(),
       itemCount: whispers.length,
       itemBuilder: (context, index) {
-        return _WhisperCard(
-          whisper: whispers[index],
-          isSent: isSent,
+        return FadeInWidget(
+          delay: Duration(milliseconds: 100 + index * 80),
+          child: _WhisperCard(
+            whisper: whispers[index],
+            isSent: isSent,
+          ),
         );
       },
     );
@@ -487,23 +517,23 @@ class _WhisperCard extends StatelessWidget {
     final isDelivered = whisper.status == WhisperStatus.delivered;
 
     return SoftCard(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.only(bottom: 14),
+      padding: const EdgeInsets.all(14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
               Container(
-                width: 48,
-                height: 48,
+                width: 46,
+                height: 46,
                 decoration: BoxDecoration(
                   color: isDelivered ? AppColors.softPink : AppColors.cream,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Center(
                   child: isDelivered
-                      ? const Icon(
+                      ? Icon(
                           Icons.mail_rounded,
                           color: AppColors.deepRose,
                           size: 24,
@@ -545,23 +575,25 @@ class _WhisperCard extends StatelessWidget {
                 ),
               ),
               if (isDelivering)
-                Container(
-                  width: 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryPink,
-                    borderRadius: BorderRadius.circular(4),
+                PulseWidget(
+                  child: Container(
+                    width: 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryPink,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
                   ),
                 ),
             ],
           ),
           if (isDelivered) ...[
-            const SizedBox(height: 16),
+            const SizedBox(height: 14),
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
                 color: AppColors.cream,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(14),
               ),
               child: Text(
                 whisper.content,
@@ -571,12 +603,12 @@ class _WhisperCard extends StatelessWidget {
               ),
             ),
           ] else ...[
-            const SizedBox(height: 16),
+            const SizedBox(height: 14),
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
                 color: AppColors.cream,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(14),
               ),
               child: Row(
                 children: [

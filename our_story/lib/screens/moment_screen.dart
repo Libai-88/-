@@ -14,7 +14,7 @@ class _MomentScreenState extends State<MomentScreen> {
   final List<Moment> _moments = [
     Moment(
       id: '1',
-      content: '今天一起看了日落，他/她偷偷牵住了我的手 💕',
+      content: '今天的日落好美呀，他/她偷偷牵住了我的手 💕',
       imageUrl: null,
       createdAt: DateTime.now().subtract(const Duration(hours: 2)),
       hugs: 5,
@@ -23,7 +23,7 @@ class _MomentScreenState extends State<MomentScreen> {
     ),
     Moment(
       id: '2',
-      content: '第一次一起做饭，虽然把厨房弄得一团糟，但是好开心呀～',
+      content: '第一次一起做饭，厨房被我们弄得一团糟，但好开心呀～',
       imageUrl: null,
       createdAt: DateTime.now().subtract(const Duration(days: 1)),
       hugs: 12,
@@ -32,7 +32,7 @@ class _MomentScreenState extends State<MomentScreen> {
     ),
     Moment(
       id: '3',
-      content: '收到了一份小礼物，是一对情侣手表⌚，感动到哭...',
+      content: '收到了一对情侣手表⌚，感动到眼眶湿润了...',
       imageUrl: null,
       createdAt: DateTime.now().subtract(const Duration(days: 3)),
       hugs: 20,
@@ -68,7 +68,10 @@ class _MomentScreenState extends State<MomentScreen> {
         child: SafeArea(
           child: Column(
             children: [
-              _buildHeader(),
+              FadeInWidget(
+                delay: const Duration(milliseconds: 100),
+                child: _buildHeader(),
+              ),
               Expanded(
                 child: ListView.builder(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -77,15 +80,18 @@ class _MomentScreenState extends State<MomentScreen> {
                   itemBuilder: (context, index) {
                     final moment = _moments[index];
                     final showTimeline = index < _moments.length - 1;
-                    return Column(
-                      children: [
-                        if (showTimeline) _buildTimeline(),
-                        _MomentCard(
-                          moment: moment,
-                          onHug: () => setState(() => moment.hugs++),
-                          onHeadPat: () => setState(() => moment.headPats++),
-                        ),
-                      ],
+                    return FadeInWidget(
+                      delay: Duration(milliseconds: 200 + index * 100),
+                      child: Column(
+                        children: [
+                          if (showTimeline) _buildTimeline(),
+                          _MomentCard(
+                            moment: moment,
+                            onHug: () => setState(() => moment.hugs++),
+                            onHeadPat: () => setState(() => moment.headPats++),
+                          ),
+                        ],
+                      ),
                     );
                   },
                 ),
@@ -107,7 +113,7 @@ class _MomentScreenState extends State<MomentScreen> {
             '✨ 瞬间胶囊',
             style: Theme.of(context).textTheme.headlineMedium,
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
           _buildPostBox(),
         ],
       ),
@@ -117,24 +123,21 @@ class _MomentScreenState extends State<MomentScreen> {
   Widget _buildPostBox() {
     return SoftCard(
       margin: EdgeInsets.zero,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(14),
       child: Column(
         children: [
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                width: 44,
-                height: 44,
+                width: 42,
+                height: 42,
                 decoration: BoxDecoration(
                   color: AppColors.softPink,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Center(
-                  child: Text(
-                    '👤',
-                    style: TextStyle(fontSize: 24),
-                  ),
+                child: const Center(
+                  child: Text('😊', style: TextStyle(fontSize: 22)),
                 ),
               ),
               const SizedBox(width: 12),
@@ -158,10 +161,28 @@ class _MomentScreenState extends State<MomentScreen> {
             children: [
               _buildUploadButton(),
               const Spacer(),
-              ElevatedButton.icon(
-                onPressed: _addMoment,
-                icon: const Icon(Icons.send_rounded, size: 18),
-                label: const Text('发布'),
+              BouncyTap(
+                onTap: _addMoment,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryPink,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.send_rounded, color: Colors.white, size: 18),
+                      const SizedBox(width: 6),
+                      Text(
+                        '发布',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ],
           ),
@@ -171,42 +192,36 @@ class _MomentScreenState extends State<MomentScreen> {
   }
 
   Widget _buildUploadButton() {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.cream,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(12),
-          onTap: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('图片上传功能开发中... 📸'),
-                duration: Duration(seconds: 1),
-              ),
-            );
-          },
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.add_photo_alternate_rounded,
-                  color: AppColors.deepRose,
-                  size: 20,
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  '添加图片',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.warmBrown,
-                  ),
-                ),
-              ],
-            ),
+    return BouncyTap(
+      onTap: () {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('图片上传功能开发中... 📸'),
+            duration: Duration(seconds: 1),
           ),
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: AppColors.cream,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              Icons.add_photo_alternate_rounded,
+              color: AppColors.deepRose,
+              size: 18,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              '添加图片',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: AppColors.warmBrown,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -215,9 +230,18 @@ class _MomentScreenState extends State<MomentScreen> {
   Widget _buildTimeline() {
     return Container(
       width: 2,
-      height: 24,
-      margin: const EdgeInsets.only(left: 29),
-      color: AppColors.primaryPink.withOpacity(0.4),
+      height: 20,
+      margin: const EdgeInsets.only(left: 27),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            AppColors.primaryPink.withOpacity(0.0),
+            AppColors.primaryPink.withOpacity(0.4),
+          ],
+        ),
+      ),
     );
   }
 
@@ -262,7 +286,7 @@ class _MomentCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SoftCard(
-      margin: EdgeInsets.zero,
+      margin: EdgeInsets.only(bottom: 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -305,11 +329,11 @@ class _MomentCard extends StatelessWidget {
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
               child: Container(
-                height: 150,
+                height: 140,
                 width: double.infinity,
                 color: AppColors.cream,
                 child: const Center(
-                  child: Icon(Icons.image, size: 48, color: AppColors.dustyRose),
+                  child: Icon(Icons.image, size: 44, color: AppColors.dustyRose),
                 ),
               ),
             ),
@@ -319,7 +343,7 @@ class _MomentCard extends StatelessWidget {
             moment.content,
             style: Theme.of(context).textTheme.bodyMedium,
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
           _buildReactionBar(context),
         ],
       ),
@@ -329,19 +353,19 @@ class _MomentCard extends StatelessWidget {
   Widget _buildReactionBar(BuildContext context) {
     return Row(
       children: [
-        _ReactionButton(
+        Expanded(child: _ReactionButton(
           icon: '🤗',
           label: '拥抱',
           count: moment.hugs,
           onTap: onHug,
-        ),
-        const SizedBox(width: 16),
-        _ReactionButton(
+        )),
+        const SizedBox(width: 12),
+        Expanded(child: _ReactionButton(
           icon: '🙆',
           label: '摸摸头',
           count: moment.headPats,
           onTap: onHeadPat,
-        ),
+        )),
       ],
     );
   }
@@ -358,7 +382,7 @@ class _MomentCard extends StatelessWidget {
   }
 }
 
-class _ReactionButton extends StatelessWidget {
+class _ReactionButton extends StatefulWidget {
   final String icon;
   final String label;
   final int count;
@@ -372,30 +396,61 @@ class _ReactionButton extends StatelessWidget {
   });
 
   @override
+  State<_ReactionButton> createState() => _ReactionButtonState();
+}
+
+class _ReactionButtonState extends State<_ReactionButton>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 200),
+      vsync: this,
+    );
+    _scaleAnimation = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.3), weight: 50),
+      TweenSequenceItem(tween: Tween(begin: 1.3, end: 1.0), weight: 50),
+    ]).animate(CurvedAnimation(parent: _controller, curve: Curves.elasticOut));
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(20),
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-          decoration: BoxDecoration(
-            color: AppColors.cream,
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Row(
-            children: [
-              Text(icon, style: const TextStyle(fontSize: 16)),
-              const SizedBox(width: 4),
-              Text(
-                '$label $count',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppColors.warmBrown,
-                ),
+    return GestureDetector(
+      onTap: () {
+        _controller.forward(from: 0);
+        widget.onTap();
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: AppColors.cream,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ScaleTransition(
+              scale: _scaleAnimation,
+              child: Text(widget.icon, style: const TextStyle(fontSize: 18)),
+            ),
+            const SizedBox(width: 6),
+            Text(
+              '${widget.label} ${widget.count}',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: AppColors.warmBrown,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

@@ -308,3 +308,172 @@ class GradientBackground extends StatelessWidget {
     );
   }
 }
+
+class FadeInWidget extends StatefulWidget {
+  final Widget child;
+  final Duration duration;
+  final Duration delay;
+  final double beginOffset;
+
+  const FadeInWidget({
+    super.key,
+    required this.child,
+    this.duration = const Duration(milliseconds: 600),
+    this.delay = Duration.zero,
+    this.beginOffset = 20.0,
+  });
+
+  @override
+  State<FadeInWidget> createState() => _FadeInWidgetState();
+}
+
+class _FadeInWidgetState extends State<FadeInWidget>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: widget.duration,
+      vsync: this,
+    );
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
+    );
+    _slideAnimation = Tween<Offset>(
+      begin: Offset(0, widget.beginOffset / 100),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
+    Future.delayed(widget.delay, () {
+      if (mounted) _controller.forward();
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _fadeAnimation,
+      child: SlideTransition(
+        position: _slideAnimation,
+        child: widget.child,
+      ),
+    );
+  }
+}
+
+class BouncyTap extends StatefulWidget {
+  final Widget child;
+  final VoidCallback? onTap;
+
+  const BouncyTap({
+    super.key,
+    required this.child,
+    this.onTap,
+  });
+
+  @override
+  State<BouncyTap> createState() => _BouncyTapState();
+}
+
+class _BouncyTapState extends State<BouncyTap>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 150),
+      vsync: this,
+    );
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.94).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: (_) => _controller.forward(),
+      onTapUp: (_) {
+        _controller.reverse();
+        widget.onTap?.call();
+      },
+      onTapCancel: () => _controller.reverse(),
+      child: ScaleTransition(
+        scale: _scaleAnimation,
+        child: widget.child,
+      ),
+    );
+  }
+}
+
+class PulseWidget extends StatefulWidget {
+  final Widget child;
+  final bool animate;
+
+  const PulseWidget({
+    super.key,
+    required this.child,
+    this.animate = true,
+  });
+
+  @override
+  State<PulseWidget> createState() => _PulseWidgetState();
+}
+
+class _PulseWidgetState extends State<PulseWidget>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 1200),
+      vsync: this,
+    );
+    _animation = Tween<double>(begin: 1.0, end: 1.08).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+    if (widget.animate) {
+      _controller.repeat(reverse: true);
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _animation,
+      builder: (context, child) {
+        return Transform.scale(
+          scale: widget.animate ? _animation.value : 1.0,
+          child: widget.child,
+        );
+      },
+    );
+  }
+}
