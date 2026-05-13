@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'config/app_theme.dart';
 import 'screens/home_screen.dart';
 import 'screens/moment_screen.dart';
+import 'screens/wishlist_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -35,6 +36,7 @@ class _MainNavigationState extends State<MainNavigation> {
   final List<Widget> _screens = const [
     HomeScreen(),
     MomentScreen(),
+    WishlistScreen(),
   ];
 
   @override
@@ -72,6 +74,12 @@ class _MainNavigationState extends State<MainNavigation> {
                   label: '瞬间',
                   isSelected: _currentIndex == 1,
                   onTap: () => setState(() => _currentIndex = 1),
+                ),
+                _NavItem(
+                  icon: Icons.favorite_rounded,
+                  label: '愿望',
+                  isSelected: _currentIndex == 2,
+                  onTap: () => setState(() => _currentIndex = 2),
                 ),
               ],
             ),
