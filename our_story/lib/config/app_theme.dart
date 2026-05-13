@@ -45,21 +45,21 @@ class AppTheme {
         color: Colors.white,
         elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(16),
         ),
-        shadowColor: AppColors.primaryPink.withOpacity(0.15),
+        shadowColor: AppColors.primaryPink.withOpacity(0.12),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primaryPink,
           foregroundColor: Colors.white,
           elevation: 0,
-          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(24),
           ),
           textStyle: GoogleFonts.nunito(
-            fontSize: 16,
+            fontSize: 15,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -68,12 +68,12 @@ class AppTheme {
         style: OutlinedButton.styleFrom(
           foregroundColor: AppColors.deepRose,
           side: const BorderSide(color: AppColors.primaryPink, width: 1.5),
-          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(24),
           ),
           textStyle: GoogleFonts.nunito(
-            fontSize: 16,
+            fontSize: 15,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -97,30 +97,32 @@ class AppTheme {
           borderRadius: BorderRadius.circular(16),
           borderSide: const BorderSide(color: AppColors.dustyRose, width: 1),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         hintStyle: GoogleFonts.nunito(
           color: AppColors.warmBrown.withOpacity(0.5),
-          fontSize: 16,
+          fontSize: 15,
         ),
       ),
-      floatingActionButtonTheme: const FloatingActionButtonThemeData(
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: AppColors.primaryPink,
         foregroundColor: Colors.white,
         elevation: 4,
-        shape: CircleBorder(),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
       ),
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.transparent,
         selectedItemColor: AppColors.deepRose,
         unselectedItemColor: AppColors.warmBrown.withOpacity(0.4),
         type: BottomNavigationBarType.fixed,
-        elevation: 8,
+        elevation: 0,
         selectedLabelStyle: GoogleFonts.nunito(
-          fontSize: 12,
+          fontSize: 11,
           fontWeight: FontWeight.w600,
         ),
         unselectedLabelStyle: GoogleFonts.nunito(
-          fontSize: 12,
+          fontSize: 11,
         ),
       ),
       iconTheme: const IconThemeData(
@@ -252,17 +254,17 @@ class SoftCard extends StatelessWidget {
       margin: margin ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primaryPink.withOpacity(0.12),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
+            color: AppColors.primaryPink.withOpacity(0.1),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
           ),
           BoxShadow(
-            color: AppColors.softPeach.withOpacity(0.08),
-            blurRadius: 40,
-            offset: const Offset(0, 16),
+            color: AppColors.softPeach.withOpacity(0.06),
+            blurRadius: 32,
+            offset: const Offset(0, 12),
           ),
         ],
       ),
@@ -270,9 +272,9 @@ class SoftCard extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(16),
           child: Padding(
-            padding: padding ?? const EdgeInsets.all(20),
+            padding: padding ?? const EdgeInsets.all(16),
             child: child,
           ),
         ),
@@ -309,6 +311,49 @@ class GradientBackground extends StatelessWidget {
   }
 }
 
+class ImagePlaceholder extends StatelessWidget {
+  final double? height;
+  final double? width;
+
+  const ImagePlaceholder({
+    super.key,
+    this.height,
+    this.width,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: height ?? 120,
+      width: width ?? double.infinity,
+      decoration: BoxDecoration(
+        color: AppColors.cream,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.favorite_rounded,
+              color: AppColors.dustyRose.withOpacity(0.5),
+              size: 32,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              '📷',
+              style: TextStyle(
+                fontSize: 14,
+                color: AppColors.warmBrown.withOpacity(0.4),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class FadeInWidget extends StatefulWidget {
   final Widget child;
   final Duration duration;
@@ -318,9 +363,9 @@ class FadeInWidget extends StatefulWidget {
   const FadeInWidget({
     super.key,
     required this.child,
-    this.duration = const Duration(milliseconds: 600),
+    this.duration = const Duration(milliseconds: 500),
     this.delay = Duration.zero,
-    this.beginOffset = 20.0,
+    this.beginOffset = 16.0,
   });
 
   @override
@@ -393,7 +438,7 @@ class _BouncyTapState extends State<BouncyTap>
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 150),
+      duration: const Duration(milliseconds: 120),
       vsync: this,
     );
     _scaleAnimation = Tween<double>(begin: 1.0, end: 0.94).animate(

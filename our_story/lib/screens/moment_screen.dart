@@ -130,14 +130,14 @@ class _MomentScreenState extends State<MomentScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                width: 42,
-                height: 42,
+                width: 40,
+                height: 40,
                 decoration: BoxDecoration(
                   color: AppColors.softPink,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Center(
-                  child: Text('😊', style: TextStyle(fontSize: 22)),
+                  child: Text('😊', style: TextStyle(fontSize: 20)),
                 ),
               ),
               const SizedBox(width: 12),
@@ -164,10 +164,10 @@ class _MomentScreenState extends State<MomentScreen> {
               BouncyTap(
                 onTap: _addMoment,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
                   decoration: BoxDecoration(
                     color: AppColors.primaryPink,
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(24),
                   ),
                   child: Row(
                     children: [
@@ -178,6 +178,7 @@ class _MomentScreenState extends State<MomentScreen> {
                         style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.w600,
+                          fontSize: 14,
                         ),
                       ),
                     ],
@@ -195,9 +196,9 @@ class _MomentScreenState extends State<MomentScreen> {
     return BouncyTap(
       onTap: () {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text('图片上传功能开发中... 📸'),
-            duration: Duration(seconds: 1),
+            duration: const Duration(seconds: 1),
           ),
         );
       },
@@ -230,8 +231,8 @@ class _MomentScreenState extends State<MomentScreen> {
   Widget _buildTimeline() {
     return Container(
       width: 2,
-      height: 20,
-      margin: const EdgeInsets.only(left: 27),
+      height: 16,
+      margin: const EdgeInsets.only(left: 26),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
@@ -286,7 +287,7 @@ class _MomentCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SoftCard(
-      margin: EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -297,7 +298,7 @@ class _MomentCard extends StatelessWidget {
                 height: 40,
                 decoration: BoxDecoration(
                   color: moment.isMe ? AppColors.softPink : AppColors.softLavender,
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 child: Center(
                   child: Text(
@@ -326,17 +327,7 @@ class _MomentCard extends StatelessWidget {
           ),
           if (moment.imageUrl != null) ...[
             const SizedBox(height: 12),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: Container(
-                height: 140,
-                width: double.infinity,
-                color: AppColors.cream,
-                child: const Center(
-                  child: Icon(Icons.image, size: 44, color: AppColors.dustyRose),
-                ),
-              ),
-            ),
+            const ImagePlaceholder(height: 140),
           ],
           const SizedBox(height: 12),
           Text(
@@ -353,19 +344,23 @@ class _MomentCard extends StatelessWidget {
   Widget _buildReactionBar(BuildContext context) {
     return Row(
       children: [
-        Expanded(child: _ReactionButton(
-          icon: '🤗',
-          label: '拥抱',
-          count: moment.hugs,
-          onTap: onHug,
-        )),
+        Expanded(
+          child: _ReactionButton(
+            icon: '🤗',
+            label: '拥抱',
+            count: moment.hugs,
+            onTap: onHug,
+          ),
+        ),
         const SizedBox(width: 12),
-        Expanded(child: _ReactionButton(
-          icon: '🙆',
-          label: '摸摸头',
-          count: moment.headPats,
-          onTap: onHeadPat,
-        )),
+        Expanded(
+          child: _ReactionButton(
+            icon: '🙆',
+            label: '摸摸头',
+            count: moment.headPats,
+            onTap: onHeadPat,
+          ),
+        ),
       ],
     );
   }
@@ -434,7 +429,7 @@ class _ReactionButtonState extends State<_ReactionButton>
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
           color: AppColors.cream,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(24),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,

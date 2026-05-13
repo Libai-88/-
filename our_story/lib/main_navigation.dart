@@ -59,18 +59,18 @@ class _MainNavigationState extends State<MainNavigation> {
   Widget _buildNavBar(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Colors.white.withOpacity(0.92),
         boxShadow: [
           BoxShadow(
             color: AppColors.primaryPink.withOpacity(0.08),
-            blurRadius: 24,
+            blurRadius: 20,
             offset: const Offset(0, -4),
           ),
         ],
       ),
       child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: List.generate(_tabs.length, (index) {
@@ -121,18 +121,18 @@ class _NavBarItem extends StatelessWidget {
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 250),
+        duration: const Duration(milliseconds: 200),
         curve: Curves.easeInOut,
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.softPink.withOpacity(0.6) : Colors.transparent,
-          borderRadius: BorderRadius.circular(16),
+          color: isSelected ? AppColors.softPink.withOpacity(0.5) : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             AnimatedSwitcher(
-              duration: const Duration(milliseconds: 250),
+              duration: const Duration(milliseconds: 200),
               child: Icon(
                 isSelected ? tab.activeIcon : tab.inactiveIcon,
                 key: ValueKey(isSelected),
@@ -140,11 +140,11 @@ class _NavBarItem extends StatelessWidget {
                 size: 24,
               ),
             ),
-            const SizedBox(height: 3),
+            const SizedBox(height: 2),
             AnimatedDefaultTextStyle(
-              duration: const Duration(milliseconds: 250),
+              duration: const Duration(milliseconds: 200),
               style: TextStyle(
-                fontSize: isSelected ? 11 : 10,
+                fontSize: 11,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                 color: color,
               ),

@@ -81,10 +81,10 @@ class _WhisperScreenState extends State<WhisperScreen>
           ),
           decoration: const BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
           ),
           child: Padding(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(20),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -99,10 +99,10 @@ class _WhisperScreenState extends State<WhisperScreen>
                     ),
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 16),
                 Row(
                   children: [
-                    const Text('✉️', style: TextStyle(fontSize: 26)),
+                    const Text('✉️', style: TextStyle(fontSize: 24)),
                     const SizedBox(width: 10),
                     Text(
                       '写一封悄悄话',
@@ -110,7 +110,7 @@ class _WhisperScreenState extends State<WhisperScreen>
                     ),
                   ],
                 ),
-                const SizedBox(height: 18),
+                const SizedBox(height: 16),
                 Container(
                   decoration: BoxDecoration(
                     color: AppColors.cream,
@@ -122,14 +122,14 @@ class _WhisperScreenState extends State<WhisperScreen>
                     decoration: InputDecoration(
                       hintText: '写下你想对Ta说的话...',
                       border: InputBorder.none,
-                      contentPadding: const EdgeInsets.all(18),
+                      contentPadding: const EdgeInsets.all(16),
                       hintStyle: TextStyle(
                         color: AppColors.warmBrown.withOpacity(0.5),
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(height: 18),
+                const SizedBox(height: 16),
                 Text(
                   '选择送达时间',
                   style: Theme.of(context).textTheme.titleSmall,
@@ -181,7 +181,7 @@ class _WhisperScreenState extends State<WhisperScreen>
                     ),
                   ],
                 ),
-                const SizedBox(height: 22),
+                const SizedBox(height: 20),
                 BouncyTap(
                   onTap: () {
                     if (contentController.text.trim().isNotEmpty) {
@@ -208,10 +208,10 @@ class _WhisperScreenState extends State<WhisperScreen>
                   },
                   child: Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
                     decoration: BoxDecoration(
                       color: AppColors.primaryPink,
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(24),
                     ),
                     child: Center(
                       child: Text(
@@ -219,13 +219,13 @@ class _WhisperScreenState extends State<WhisperScreen>
                         style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.w600,
-                          fontSize: 16,
+                          fontSize: 15,
                         ),
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 12),
               ],
             ),
           ),
@@ -247,16 +247,17 @@ class _WhisperScreenState extends State<WhisperScreen>
     return BouncyTap(
       onTap: () => onSelect(time),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
           color: isSelected ? AppColors.primaryPink : AppColors.cream,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(24),
         ),
         child: Text(
           label,
           style: TextStyle(
             color: isSelected ? Colors.white : AppColors.warmBrown,
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+            fontSize: 13,
           ),
         ),
       ),
@@ -321,16 +322,16 @@ class _WhisperScreenState extends State<WhisperScreen>
               BouncyTap(
                 onTap: _showWriteWhisperDialog,
                 child: Container(
-                  width: 46,
-                  height: 46,
+                  width: 42,
+                  height: 42,
                   decoration: BoxDecoration(
                     color: AppColors.primaryPink,
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Icon(
                     Icons.edit_rounded,
                     color: Colors.white,
-                    size: 24,
+                    size: 22,
                   ),
                 ),
               ),
@@ -344,17 +345,17 @@ class _WhisperScreenState extends State<WhisperScreen>
             child: Row(
               children: [
                 Container(
-                  width: 42,
-                  height: 42,
+                  width: 40,
+                  height: 40,
                   decoration: BoxDecoration(
                     color: AppColors.softPink,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Center(
-                    child: Text('✉️', style: TextStyle(fontSize: 22)),
+                    child: Text('✉️', style: TextStyle(fontSize: 20)),
                   ),
                 ),
-                const SizedBox(width: 14),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -374,7 +375,7 @@ class _WhisperScreenState extends State<WhisperScreen>
                 Icon(
                   Icons.arrow_forward_ios_rounded,
                   color: AppColors.warmBrown.withOpacity(0.3),
-                  size: 16,
+                  size: 14,
                 ),
               ],
             ),
@@ -400,7 +401,7 @@ class _WhisperScreenState extends State<WhisperScreen>
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: AppColors.primaryPink.withOpacity(0.2),
+                color: AppColors.primaryPink.withOpacity(0.15),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -416,7 +417,7 @@ class _WhisperScreenState extends State<WhisperScreen>
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.send_rounded, size: 18),
+                  const Icon(Icons.send_rounded, size: 16),
                   const SizedBox(width: 6),
                   Text('已发送'),
                 ],
@@ -426,7 +427,7 @@ class _WhisperScreenState extends State<WhisperScreen>
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.inbox_rounded, size: 18),
+                  const Icon(Icons.inbox_rounded, size: 16),
                   const SizedBox(width: 6),
                   Text('收到的'),
                 ],
@@ -446,7 +447,7 @@ class _WhisperScreenState extends State<WhisperScreen>
           children: [
             Text(
               isSent ? '✉️' : '📭',
-              style: const TextStyle(fontSize: 60),
+              style: const TextStyle(fontSize: 56),
             ),
             const SizedBox(height: 14),
             Text(
@@ -517,7 +518,7 @@ class _WhisperCard extends StatelessWidget {
     final isDelivered = whisper.status == WhisperStatus.delivered;
 
     return SoftCard(
-      margin: const EdgeInsets.only(bottom: 14),
+      margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -525,8 +526,8 @@ class _WhisperCard extends StatelessWidget {
           Row(
             children: [
               Container(
-                width: 46,
-                height: 46,
+                width: 44,
+                height: 44,
                 decoration: BoxDecoration(
                   color: isDelivered ? AppColors.softPink : AppColors.cream,
                   borderRadius: BorderRadius.circular(12),
@@ -536,9 +537,9 @@ class _WhisperCard extends StatelessWidget {
                       ? Icon(
                           Icons.mail_rounded,
                           color: AppColors.deepRose,
-                          size: 24,
+                          size: 22,
                         )
-                      : const Text('✉️', style: TextStyle(fontSize: 24)),
+                      : const Text('✉️', style: TextStyle(fontSize: 22)),
                 ),
               ),
               const SizedBox(width: 12),
@@ -555,7 +556,7 @@ class _WhisperCard extends StatelessWidget {
                       children: [
                         Icon(
                           isDelivered ? Icons.check_circle_rounded : Icons.schedule_rounded,
-                          size: 14,
+                          size: 12,
                           color: isDelivered ? AppColors.deepRose : AppColors.warmBrown.withOpacity(0.5),
                         ),
                         const SizedBox(width: 4),
@@ -588,12 +589,12 @@ class _WhisperCard extends StatelessWidget {
             ],
           ),
           if (isDelivered) ...[
-            const SizedBox(height: 14),
+            const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
                 color: AppColors.cream,
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
                 whisper.content,
@@ -603,18 +604,18 @@ class _WhisperCard extends StatelessWidget {
               ),
             ),
           ] else ...[
-            const SizedBox(height: 14),
+            const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
                 color: AppColors.cream,
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
                 children: [
                   Icon(
                     Icons.lock_rounded,
-                    size: 16,
+                    size: 14,
                     color: AppColors.warmBrown.withOpacity(0.5),
                   ),
                   const SizedBox(width: 8),
