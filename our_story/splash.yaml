@@ -1,0 +1,11 @@
+flutter_native_splash:
+  color: "#FFF8F0"
+  color_dark: "#FFF8F0"
+  image: assets/splash_icon.png
+  brand: Our Story
+  brand_height: 60
+  fullscreen: true
+  gravity: center
+  android_12:
+    color: "#FFF8F0"
+    image: assets/splash_icon.png

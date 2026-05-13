@@ -9,25 +9,28 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  
+
   # Firebase
   firebase_core: ^2.24.2
   cloud_firestore: ^4.14.0
   firebase_auth: ^4.16.0
   firebase_storage: ^11.6.0
-  
+
   # UI/UX
   google_fonts: ^6.1.0
-  
+
   # Utilities
   intl: ^0.18.1
-  
+
   # State Management
   provider: ^6.1.1
-  
+
   # Image handling
   cached_network_image: ^3.3.1
   image_picker: ^1.0.7
+
+  # Splash Screen
+  flutter_native_splash: ^2.3.10
 
 dev_dependencies:
   flutter_test:
@@ -36,3 +39,6 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+  assets:
+    - android/app/src/main/res/drawable/
