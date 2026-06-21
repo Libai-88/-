@@ -1,0 +1,90 @@
+// Global styles for Kirameku Admin - Dark Theme
+:root {
+  --admin-bg-color: #0a0a0a;
+  --admin-bg-lighter: #141414;
+  --admin-bg-hover: #1a1a1a;
+  --admin-border-color: #2a2a2a;
+  --admin-text-primary: #e5e5e5;
+  --admin-text-secondary: #a0a0a0;
+  --admin-accent-color: #7c3aed;
+  --admin-accent-hover: #8b5cf6;
+  --sidebar-width: 240px;
+  --header-height: 60px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: var(--admin-bg-color);
+  color: var(--admin-text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#app {
+  height: 100%;
+}
+
+// Override Element Plus dark theme variables
+.el-table {
+  --el-table-bg-color: var(--admin-bg-lighter) !important;
+  --el-table-tr-bg-color: var(--admin-bg-lighter) !important;
+  --el-table-header-bg-color: var(--admin-bg-hover) !important;
+  --el-table-border-color: var(--admin-border-color) !important;
+  --el-table-row-hover-bg-color: var(--admin-bg-hover) !important;
+  background-color: var(--admin-bg-lighter);
+}
+
+.el-card {
+  background-color: var(--admin-bg-lighter);
+  border-color: var(--admin-border-color);
+}
+
+.el-dialog {
+  background-color: var(--admin-bg-lighter);
+  border-color: var(--admin-border-color);
+}
+
+.el-input__wrapper,
+.el-textarea__inner {
+  background-color: var(--admin-bg-color);
+  border-color: var(--admin-border-color);
+}
+
+.el-input__wrapper:hover,
+.el-textarea__inner:hover {
+  border-color: var(--admin-accent-color);
+}
+
+.el-select .el-input__wrapper {
+  background-color: var(--admin-bg-color);
+}
+
+.el-form-item__label {
+  color: var(--admin-text-primary);
+}
+
+// Scrollbar styling
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--admin-bg-color);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 3px;
+  
+  &:hover {
+    background: #444;
+  }
+}
