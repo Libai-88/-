@@ -3,10 +3,10 @@ from functools import lru_cache
 
 
 class Settings(BaseSettings):
-    DATABASE_URL: str = "postgresql://postgres:postgres@localhost:5432/kirameku"
+    DATABASE_URL: str = "sqlite:///./kirameku.db"
     EMBEDDING_API_KEY: str = ""
-    EMBEDDING_API_BASE: str = "https://api.openai.com/v1"
-    EMBEDDING_MODEL: str = "text-embedding-ada-002"
+    EMBEDDING_API_BASE: str = "https://api.deepseek.com/v1"
+    EMBEDDING_MODEL: str = "text-embedding-3-small"
     EMBEDDING_DIMENSIONS: int = 1536
     CORS_ORIGINS: str = "*"
 

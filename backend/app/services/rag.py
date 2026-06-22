@@ -1,14 +1,17 @@
+import json
 import httpx
 import logging
-from typing import List, Optional
+from typing import List
 from sqlalchemy.orm import Session
+from sqlalchemy import or_
 from app.core.config import get_settings
 from app.models.embedding import PostEmbedding
-from app.models.post import Post
+from app.models.post import Post, PostStatus
 
 logger = logging.getLogger(__name__)
 
 settings = get_settings()
+_IS_SQLITE = settings.DATABASE_URL.startswith("sqlite")
 
 
 class RAGService:
@@ -48,13 +51,17 @@ class RAGService:
         self, db: Session, post: Post, text: str
     ) -> PostEmbedding:
         """为文章创建或更新向量"""
-        embedding_vector = await self.generate_embedding(text)
+        embedding_value = await self.generate_embedding(text)
+
+        # SQLite stores embedding as JSON string
+        if _IS_SQLITE:
+            embedding_value = json.dumps(embedding_value)
 
         existing = (
             db.query(PostEmbedding).filter(PostEmbedding.post_id == post.id).first()
         )
         if existing:
-            existing.embedding = embedding_vector
+            existing.embedding = embedding_value
             existing.content = text
             db.commit()
             db.refresh(existing)
@@ -63,7 +70,7 @@ class RAGService:
         db_embedding = PostEmbedding(
             post_id=post.id,
             content=text,
-            embedding=embedding_vector,
+            embedding=embedding_value,
         )
         db.add(db_embedding)
         db.commit()
@@ -73,15 +80,21 @@ class RAGService:
     async def search_similar_posts(
         self, db: Session, query: str, limit: int = 10
     ) -> List[PostEmbedding]:
-        """通过向量相似度搜索相关文章"""
+        """通过向量相似度搜索相关文章（SQLite 降级为文本搜索）"""
+        if _IS_SQLITE:
+            return self._sqlite_text_search(db, query, limit)
+
+        if not self.api_key:
+            return self._sqlite_text_search(db, query, limit)
+
         try:
             query_embedding = await self.generate_embedding(query)
         except Exception as e:
             logger.error(f"Failed to generate query embedding: {e}")
-            return []
+            return self._sqlite_text_search(db, query, limit)
 
         if not query_embedding:
-            return []
+            return self._sqlite_text_search(db, query, limit)
 
         try:
             results = (
@@ -93,4 +106,27 @@ class RAGService:
             return results
         except Exception as e:
             logger.error(f"Vector search failed: {e}")
+            return self._sqlite_text_search(db, query, limit)
+
+    def _sqlite_text_search(
+        self, db: Session, query: str, limit: int
+    ) -> List[PostEmbedding]:
+        """SQLite 降级方案：文本相似度搜索"""
+        search_term = f"%{query}%"
+        embeddings = (
+            db.query(PostEmbedding)
+            .filter(
+                or_(
+                    PostEmbedding.content.like(search_term),
+                    PostEmbedding.content.like(f"%{query}%"),
+                )
+            )
+            .limit(limit)
+            .all()
+        )
+
+        if not embeddings:
+            # 如果没有向量数据，直接返回空（让 API 层 fallback 到全文搜索）
             return []
+
+        return embeddings
