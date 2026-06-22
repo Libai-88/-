@@ -21,7 +21,12 @@ const defaultConfig: AIConfig = {
 export async function getAIConfig(): Promise<AIConfig> {
   // 优先从数据库获取配置，如果没有则使用环境变量
   try {
-    const response = await fetch(`${process.env.BACKEND_URL}/api/ai/config`, {
+    const backendUrl = process.env.BACKEND_URL;
+    if (!backendUrl) {
+      return defaultConfig;
+    }
+
+    const response = await fetch(`${backendUrl}/api/ai/config/active`, {
       cache: 'no-store',
     });
     if (response.ok) {
@@ -32,15 +37,4 @@ export async function getAIConfig(): Promise<AIConfig> {
   }
 
   return defaultConfig;
-}
-
-export function getModel(config: AIConfig) {
-  const { createOpenAI } = require('@ai-sdk/openai');
-
-  const provider = createOpenAI({
-    apiKey: config.apiKey,
-    baseURL: config.baseURL || 'https://api.deepseek.com/v1',
-  });
-
-  return provider(config.model);
 }

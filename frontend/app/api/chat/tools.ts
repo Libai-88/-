@@ -1,6 +1,8 @@
 import { tool } from 'ai';
 import { z } from 'zod';
 
+const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8000';
+
 // 搜索文章工具
 export const searchPostsTool = tool({
   description: '搜索博客中的文章，根据关键词或语义查找相关内容',
@@ -9,15 +11,19 @@ export const searchPostsTool = tool({
     limit: z.number().optional().default(5).describe('返回结果数量，默认 5 条'),
   }),
   execute: async ({ query, limit = 5 }) => {
-    const response = await fetch(`${process.env.BACKEND_URL}/api/posts/search`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query, limit }),
-    });
-    if (!response.ok) {
-      return { error: '搜索失败', details: await response.text() };
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/posts/search`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query, limit }),
+      });
+      if (!response.ok) {
+        return { error: '搜索失败', details: await response.text() };
+      }
+      return await response.json();
+    } catch (err) {
+      return { error: '搜索服务不可用', details: err instanceof Error ? err.message : 'Unknown error' };
     }
-    return response.json();
   },
 });
 
@@ -28,11 +34,15 @@ export const getPostTool = tool({
     postId: z.number().describe('文章 ID'),
   }),
   execute: async ({ postId }) => {
-    const response = await fetch(`${process.env.BACKEND_URL}/api/posts/${postId}`);
-    if (!response.ok) {
-      return { error: '获取文章失败', details: await response.text() };
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/posts/${postId}`);
+      if (!response.ok) {
+        return { error: '获取文章失败', details: await response.text() };
+      }
+      return await response.json();
+    } catch (err) {
+      return { error: '文章服务不可用', details: err instanceof Error ? err.message : 'Unknown error' };
     }
-    return response.json();
   },
 });
 
@@ -41,11 +51,15 @@ export const getTagsTool = tool({
   description: '获取博客中所有的标签列表',
   parameters: z.object({}),
   execute: async () => {
-    const response = await fetch(`${process.env.BACKEND_URL}/api/tags`);
-    if (!response.ok) {
-      return { error: '获取标签失败', details: await response.text() };
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/tags`);
+      if (!response.ok) {
+        return { error: '获取标签失败', details: await response.text() };
+      }
+      return await response.json();
+    } catch (err) {
+      return { error: '标签服务不可用', details: err instanceof Error ? err.message : 'Unknown error' };
     }
-    return response.json();
   },
 });
 
@@ -54,11 +68,15 @@ export const getStatsTool = tool({
   description: '获取博客的统计数据，如文章数量、说说数量、访问量等',
   parameters: z.object({}),
   execute: async () => {
-    const response = await fetch(`${process.env.BACKEND_URL}/api/stats`);
-    if (!response.ok) {
-      return { error: '获取统计数据失败', details: await response.text() };
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/stats`);
+      if (!response.ok) {
+        return { error: '获取统计数据失败', details: await response.text() };
+      }
+      return await response.json();
+    } catch (err) {
+      return { error: '统计服务不可用', details: err instanceof Error ? err.message : 'Unknown error' };
     }
-    return response.json();
   },
 });
 
@@ -72,15 +90,19 @@ export const createPostDraftTool = tool({
     tags: z.array(z.string()).optional().describe('文章标签列表'),
   }),
   execute: async ({ title, content, summary, tags }) => {
-    const response = await fetch(`${process.env.BACKEND_URL}/api/posts/draft`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title, content, summary, tags, status: 'draft' }),
-    });
-    if (!response.ok) {
-      return { error: '创建草稿失败', details: await response.text() };
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/posts/draft`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, content, summary, tags, status: 'draft' }),
+      });
+      if (!response.ok) {
+        return { error: '创建草稿失败', details: await response.text() };
+      }
+      return await response.json();
+    } catch (err) {
+      return { error: '草稿服务不可用', details: err instanceof Error ? err.message : 'Unknown error' };
     }
-    return response.json();
   },
 });
 

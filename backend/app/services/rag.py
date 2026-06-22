@@ -1,10 +1,12 @@
 import httpx
-import numpy as np
-from typing import List
+import logging
+from typing import List, Optional
 from sqlalchemy.orm import Session
 from app.core.config import get_settings
 from app.models.embedding import PostEmbedding
 from app.models.post import Post
+
+logger = logging.getLogger(__name__)
 
 settings = get_settings()
 
@@ -17,6 +19,10 @@ class RAGService:
         self.dimensions = settings.EMBEDDING_DIMENSIONS
 
     async def generate_embedding(self, text: str) -> List[float]:
+        """生成文本的向量表示"""
+        if not self.api_key:
+            raise ValueError("EMBEDDING_API_KEY is not configured")
+
         headers = {
             "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json",
@@ -32,11 +38,16 @@ class RAGService:
             )
             response.raise_for_status()
             data = response.json()
+
+            if not data.get("data"):
+                raise ValueError("Invalid embedding response: no data")
+
             return data["data"][0]["embedding"]
 
     async def create_post_embedding(
         self, db: Session, post: Post, text: str
     ) -> PostEmbedding:
+        """为文章创建或更新向量"""
         embedding_vector = await self.generate_embedding(text)
 
         existing = (
@@ -62,12 +73,24 @@ class RAGService:
     async def search_similar_posts(
         self, db: Session, query: str, limit: int = 10
     ) -> List[PostEmbedding]:
-        query_embedding = await self.generate_embedding(query)
-        np_query = np.array(query_embedding)
+        """通过向量相似度搜索相关文章"""
+        try:
+            query_embedding = await self.generate_embedding(query)
+        except Exception as e:
+            logger.error(f"Failed to generate query embedding: {e}")
+            return []
 
-        return (
-            db.query(PostEmbedding)
-            .order_by(PostEmbedding.embedding.cosine_distance(np_query))
-            .limit(limit)
-            .all()
-        )
+        if not query_embedding:
+            return []
+
+        try:
+            results = (
+                db.query(PostEmbedding)
+                .order_by(PostEmbedding.embedding.cosine_distance(query_embedding))
+                .limit(limit)
+                .all()
+            )
+            return results
+        except Exception as e:
+            logger.error(f"Vector search failed: {e}")
+            return []
