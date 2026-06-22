@@ -1,0 +1,31 @@
+services:
+  - type: web
+    name: kirameku-backend
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: DATABASE_URL
+        fromDatabase:
+          name: kirameku-db
+          property: connectionString
+      - key: EMBEDDING_API_KEY
+        sync: false
+      - key: EMBEDDING_API_BASE
+        value: https://api.deepseek.com/v1
+      - key: EMBEDDING_MODEL
+        value: text-embedding-ada-002
+      - key: EMBEDDING_DIMENSIONS
+        value: "1536"
+    healthCheckPath: /health
+    autoDeploy: true
+
+databases:
+  - name: kirameku-db
+    plan: free
+    databaseName: kirameku
+    user: kirameku
+    ipAllowList: []

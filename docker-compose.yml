@@ -1,0 +1,56 @@
+version: "3.8"
+
+services:
+  db:
+    image: ankane/pgvector:latest
+    container_name: kirameku-db
+    environment:
+      POSTGRES_USER: kirameku
+      POSTGRES_PASSWORD: kirameku_password
+      POSTGRES_DB: kirameku
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./backend/database/init.sql:/docker-entrypoint-initdb.d/01-init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kirameku -d kirameku"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: kirameku-backend
+    environment:
+      DATABASE_URL: postgresql://kirameku:kirameku_password@db:5432/kirameku
+      EMBEDDING_API_KEY: ${EMBEDDING_API_KEY:-}
+      EMBEDDING_API_BASE: ${EMBEDDING_API_BASE:-https://api.deepseek.com/v1}
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-text-embedding-ada-002}
+      EMBEDDING_DIMENSIONS: ${EMBEDDING_DIMENSIONS:-1536}
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: kirameku-frontend
+    environment:
+      NEXT_PUBLIC_BACKEND_URL: http://localhost:8000
+      BACKEND_URL: http://localhost:8000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:

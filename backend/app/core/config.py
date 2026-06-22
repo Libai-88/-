@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     EMBEDDING_API_BASE: str = "https://api.openai.com/v1"
     EMBEDDING_MODEL: str = "text-embedding-ada-002"
     EMBEDDING_DIMENSIONS: int = 1536
+    CORS_ORIGINS: str = "*"
 
     class Config:
         env_file = ".env"
