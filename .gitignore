@@ -1,0 +1,29 @@
+# Node
+node_modules/
+.next/
+dist/
+tsconfig.tsbuildinfo
+
+# Python
+__pycache__/
+*.pyc
+venv/
+*.egg-info/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env (保留 example)
+*.env
+!.env.example
+
+# Docker
+*.log
+
+# Admin
+admin/node_modules/
